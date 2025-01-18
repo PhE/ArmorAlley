@@ -54,6 +54,7 @@ let reliable = !searchParams.get('unreliable');
 
 let peer;
 let peerConnection;
+let peerConnections = [];
 
 const avg = (a) => a.reduce((x, y) => x + y) / a.length;
 
@@ -117,9 +118,8 @@ const processImmediateTypes = {
   ACK: true
 };
 
-const connectionText = `Connecting, “${
-  reliable ? 'reliable' : 'fast'
-}” delivery...`;
+const connectionText = `Connecting, “${reliable ? 'reliable' : 'fast'
+  }” delivery...`;
 
 const showLocalMessage = (html) => console.log(html.replace(/<br \/>/gi, '\n'));
 
@@ -134,7 +134,7 @@ function sendDelayedMessage(obj, callback) {
   const delta = Math.max(
     1,
     game.objects.gameLoop.data.frameCount -
-      game.objects.gameLoop.data.remoteFrameCount
+    game.objects.gameLoop.data.remoteFrameCount
   );
 
   /**
@@ -208,8 +208,7 @@ function sendMessage(obj, callback, delay) {
     // skip "old" outgoing messages. in the fast-forward case, this saves unnecessary traffic and possible side-effects.
     if (debugNetwork)
       console.info(
-        `💌 sendMessage: Dropping, too far behind remote. ${goLd.frameCount}/${
-          goLd.remoteFrameCount
+        `💌 sendMessage: Dropping, too far behind remote. ${goLd.frameCount}/${goLd.remoteFrameCount
         }, Δ ${goLd.remoteFrameCount - goLd.frameCount} > ${OLD_FRAME_CUTOFF}`
       );
     return;
@@ -222,14 +221,27 @@ function sendMessage(obj, callback, delay) {
 
   // decorate with timing information
   // hat tip: https://github.com/mitxela/webrtc-pong/blob/master/pong.htm
-  peerConnection?.send({
-    ...obj,
-    frameCount: game.objects.gameLoop.data.frameCount,
-    t1: timePair.t1,
-    t2: timePair.t2,
-    tSend: performance.now()
-  });
-
+  if (peerConnections.length == 0) {
+    peerConnection?.send({
+      ...obj,
+      frameCount: game.objects.gameLoop.data.frameCount,
+      t1: timePair.t1,
+      t2: timePair.t2,
+      tSend: performance.now()
+    });
+  }
+  //peerConnections
+  console.log("===== peerConnections.send ... TODO", peerConnections);
+  for (const cx of peerConnections) {
+    console.log("... peerConnections", cx);
+    cx?.send({
+      ...obj,
+      frameCount: game.objects.gameLoop.data.frameCount,
+      t1: timePair.t1,
+      t2: timePair.t2,
+      tSend: performance.now()
+    });
+  }
   /**
    * Only certain messages cause "modem lights" to blink,
    * unless lock-step is active and we're waiting for the remote.
@@ -637,10 +649,8 @@ function processData(data) {
     // guards are in place on the transmitting side, as well.
     if (debugNetwork)
       console.info(
-        `💌 RX: Dropping message, too old. ${data.frameCount}/${
-          game.objects.gameLoop.data.frameCount
-        }, Δ ${
-          game.objects.gameLoop.data.frameCount - data.frameCount
+        `💌 RX: Dropping message, too old. ${data.frameCount}/${game.objects.gameLoop.data.frameCount
+        }, Δ ${game.objects.gameLoop.data.frameCount - data.frameCount
         } > ${OLD_FRAME_CUTOFF}`
       );
     return;
@@ -922,8 +932,11 @@ const net = {
 
     peer.on('connection', (conn) => {
       // "SERVER" (host) - incoming connection
+      console.log('>>>>>>>>>>>>>>> connection ....')
 
       peerConnection = conn;
+      peerConnections.push(conn);
+      console.log("peerConnections.push", peerConnections);
 
       net.active = true;
 
@@ -996,6 +1009,7 @@ const net = {
 
       net.connected = true;
 
+      console.log("peerConnections on open ....");
       peerConnection = connection;
 
       net.active = true;

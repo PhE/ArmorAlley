@@ -26,7 +26,10 @@ updateFrameTiming();
 
 const searchParams = new URLSearchParams(window.location.search);
 
-const debugNetwork = searchParams.get('debugNetwork');
+// can(t get it to work in the URL, so force it !
+//const debugNetwork = searchParams.get('debugNetwork');
+console.log('!!! Forcing debugNetwork = true')
+const debugNetwork = true;
 
 const debugPingPong = searchParams.get('debugPingPong');
 
@@ -192,6 +195,7 @@ function unSerializeObjectReferences(obj = {}) {
 }
 
 function sendMessage(obj, callback, delay) {
+  console.log('debugNetwork', debugNetwork)
   if (debugNetwork)
     console.log('💌 sendMessage', game.objects.gameLoop.data.frameCount);
 
@@ -231,16 +235,18 @@ function sendMessage(obj, callback, delay) {
     });
   }
   //peerConnections
-  console.log("===== peerConnections.send ... TODO", peerConnections);
+  //console.log("===== peerConnections.send ... TODO", peerConnections);
   for (const cx of peerConnections) {
-    console.log("... peerConnections", cx);
-    cx?.send({
-      ...obj,
-      frameCount: game.objects.gameLoop.data.frameCount,
-      t1: timePair.t1,
-      t2: timePair.t2,
-      tSend: performance.now()
-    });
+    if (peerConnection.peer !== cx.peer) {
+      console.log(`>>> sendMessage peerConnections to #${cx.peer}`, cx);
+      cx?.send({
+        ...obj,
+        frameCount: game.objects.gameLoop.data.frameCount,
+        t1: timePair.t1,
+        t2: timePair.t2,
+        tSend: performance.now()
+      });
+  }
   }
   /**
    * Only certain messages cause "modem lights" to blink,
@@ -629,10 +635,29 @@ const messageActions = {
   }
 };
 
-function processData(data) {
+function processData(data, authorPeerID) {
   // somebody loves us; we have a message. 💌
 
-  if (debugNetwork) console.log('💌 RX: processData', data);
+  if (debugNetwork) console.log(`💌 RX: processData from ${authorPeerID}`, data);
+
+  //TODO: move below ...
+  // send message to all other clients (except the sender)
+  // it will only matters on host side (peerConnections is empty on client ??)
+  console.log(`>>> send message back from #${peer.id} ???`);
+  for (const cx of peerConnections) {
+    if (authorPeerID === cx.peer) {
+      console.log(`>>> don't send back to author #${authorPeerID}`);
+    } else {
+      console.log(`>>> send message back to #${cx.peer}`, data);
+    }
+    //cx?.send({
+    //  ...data,
+    //  frameCount: game.objects.gameLoop.data.frameCount,
+    //  t1: timePair.t1,
+    //  t2: timePair.t2,
+    //  tSend: performance.now()
+    //});
+  }
 
   net.newPacketCount++;
 
@@ -703,6 +728,9 @@ function processData(data) {
 
   // messages will be processed within the game loop.
   rxQueue.push(data);
+
+
+
 }
 
 function processMessage(data) {
@@ -932,11 +960,10 @@ const net = {
 
     peer.on('connection', (conn) => {
       // "SERVER" (host) - incoming connection
-      console.log('>>>>>>>>>>>>>>> connection ....')
-
+      
       peerConnection = conn;
       peerConnections.push(conn);
-      console.log("peerConnections.push", peerConnections);
+      console.log('<<< peerConnections.push ....', peerConnection, peerConnections)
 
       net.active = true;
 
@@ -951,7 +978,7 @@ const net = {
 
         prefsManager.onConnect();
 
-        conn.on('data', (data) => processData(data));
+        conn.on('data', (data) => processData(data, conn.peer));
 
         if (debugNetwork) console.log('starting ping test');
 

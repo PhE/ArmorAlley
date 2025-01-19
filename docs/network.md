@@ -33,6 +33,7 @@ TODO:
 * look for console message `local is ready; delaying, then starting game 1.5`
 * look for console message `NETWORK GAME`
 * look for console message `you are hosting: you are helicopters[0], and take the friendly base`
+* look for console message `you are a guest: you are helicopters[1], and take the enemy base`
 * see messageActions
 * see preferences.js `gamePrefs.net_player_name`
 

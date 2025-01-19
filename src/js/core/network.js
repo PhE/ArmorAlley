@@ -237,16 +237,14 @@ function sendMessage(obj, callback, delay) {
   //peerConnections
   //console.log("===== peerConnections.send ... TODO", peerConnections);
   for (const cx of peerConnections) {
-    if (peerConnection.peer !== cx.peer) {
-      console.log(`>>> sendMessage peerConnections to #${cx.peer}`, cx);
-      cx?.send({
-        ...obj,
-        frameCount: game.objects.gameLoop.data.frameCount,
-        t1: timePair.t1,
-        t2: timePair.t2,
-        tSend: performance.now()
-      });
-  }
+    console.log(">>> sendMessage peerConnections", cx);
+    cx?.send({
+      ...obj,
+      frameCount: game.objects.gameLoop.data.frameCount,
+      t1: timePair.t1,
+      t2: timePair.t2,
+      tSend: performance.now()
+    });
   }
   /**
    * Only certain messages cause "modem lights" to blink,
@@ -651,7 +649,7 @@ function processData(data, authorPeerID) {
       console.log(`>>> send message back to #${cx.peer}`, data);
     }
     //cx?.send({
-    //  ...data,
+    //  ...obj,
     //  frameCount: game.objects.gameLoop.data.frameCount,
     //  t1: timePair.t1,
     //  t2: timePair.t2,

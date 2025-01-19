@@ -28,8 +28,9 @@ const searchParams = new URLSearchParams(window.location.search);
 
 // can(t get it to work in the URL, so force it !
 //const debugNetwork = searchParams.get('debugNetwork');
-console.log('!!! Forcing debugNetwork = true')
-const debugNetwork = true;
+//console.log('!!! Forcing debugNetwork = true')
+//const debugNetwork = true;
+const debugNetwork = false;
 
 const debugPingPong = searchParams.get('debugPingPong');
 
@@ -195,7 +196,6 @@ function unSerializeObjectReferences(obj = {}) {
 }
 
 function sendMessage(obj, callback, delay) {
-  console.log('debugNetwork', debugNetwork)
   if (debugNetwork)
     console.log('💌 sendMessage', game.objects.gameLoop.data.frameCount);
 
@@ -226,6 +226,7 @@ function sendMessage(obj, callback, delay) {
   // decorate with timing information
   // hat tip: https://github.com/mitxela/webrtc-pong/blob/master/pong.htm
   if (peerConnections.length == 0) {
+    console.log(`>>> sendMessage to host #${peerConnection.peer}`, obj);
     peerConnection?.send({
       ...obj,
       frameCount: game.objects.gameLoop.data.frameCount,
@@ -238,7 +239,7 @@ function sendMessage(obj, callback, delay) {
   //console.log("===== peerConnections.send ... TODO", peerConnections);
   for (const cx of peerConnections) {
     //if (peerConnection.peer !== cx.peer) {
-      console.log(`>>> sendMessage peerConnections to #${cx.peer}`, cx);
+      console.log(`>>> sendMessage to client #${cx.peer}`, obj);
     cx?.send({
       ...obj,
       frameCount: game.objects.gameLoop.data.frameCount,
@@ -640,24 +641,30 @@ function processData(data, authorPeerID) {
   // somebody loves us; we have a message. 💌
 
   if (debugNetwork) console.log(`💌 RX: processData from ${authorPeerID}`, data);
+  console.log(`<<< recieve message from #${authorPeerID}`, data);
+
 
   //TODO: move below ...
   // send message to all other clients (except the sender)
   // it will only matters on host side (peerConnections is empty on client ??)
-  console.log(`>>> send message back from #${peer.id} ???`);
+  //console.log(`>>> send message back from #${peer.id} ???`);
   for (const cx of peerConnections) {
     if (authorPeerID === cx.peer) {
       console.log(`>>> don't send back to author #${authorPeerID}`);
     } else {
       console.log(`>>> send message back to #${cx.peer}`, data);
+      const data2 = {
+        params: data.params,
+        type: data.type,
+      }
+      cx?.send({
+        ...data2,
+        frameCount: game.objects.gameLoop.data.frameCount,
+        t1: timePair.t1,
+        t2: timePair.t2,
+        tSend: performance.now()
+      });
     }
-    //cx?.send({
-    //  ...data,
-    //  frameCount: game.objects.gameLoop.data.frameCount,
-    //  t1: timePair.t1,
-    //  t2: timePair.t2,
-    //  tSend: performance.now()
-    //});
   }
 
   net.newPacketCount++;
@@ -964,7 +971,7 @@ const net = {
       
       peerConnection = conn;
       peerConnections.push(conn);
-      console.log('<<< peerConnections.push ....', peerConnection, peerConnections)
+      console.log(`<<< peerConnections.push ${peerConnections.length} players`, peerConnection, peerConnections)
 
       net.active = true;
 

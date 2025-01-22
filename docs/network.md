@@ -26,7 +26,27 @@ Actions:
 
 
 
-TODO:
+# network UI
+
+
+A div `network-players-info` is created with the players info.
+
+Look for node `network-options-link`
+
+
+A div `battle-list` renamed to `player-list` (used to fill player info).
+
+Button `READY` `game-prefs-submit`, `dom.oFormSubmit`, `showForReal()`
+
+
+## player name
+
+Apply same logic for `REMOTE_PLAYER_NAME` as  `REMOTE_READY` (update UI)
+
+`gamePrefs.net_remote_player_name`
+
+# TODO
+
 * `connection.on('close'` close only one connection, if everyone disconnect thet reset
 * `sendMessage` update ??
 * `sendDelayedMessage` update ??
@@ -37,7 +57,7 @@ TODO:
 * look for console message `you are a guest: you are helicopters[1], and take the enemy base`
 * see messageActions
 * see preferences.js `gamePrefs.net_player_name`
-
+* see `doHostSetup()`
 # log
 
 * 2025-01-18: chat is working one way (server > client) for 3 players

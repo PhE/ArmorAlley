@@ -575,6 +575,7 @@ const messageActions = {
     }
   },
 
+  
   SYN: (data) => {
     if (data.seed !== undefined) {
       if (debugNetwork) console.log('network SYN: received seed', data);

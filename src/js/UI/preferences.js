@@ -526,6 +526,8 @@ function PrefsManager() {
 
     const linkDetail = document.getElementById('network-options-link');
 
+
+
     inviteButton.onclick = () => {
       copyToClipboard(inviteURL, (ok) => {
         inviteContainer.remove();
@@ -812,7 +814,7 @@ function PrefsManager() {
       renderBattleRow(input.getAttribute('value'), input)
     );
   }
-
+  
   function renderBattleRow(levelName, inputNode) {
     let data = normalizeLevelData(
       originalLevels[levelName] || networkBattles[levelName]
@@ -903,6 +905,8 @@ function PrefsManager() {
 
     maybeUpdateGameSpeed();
 
+    console.debug('>>>> options.network', options.network)
+    
     if (options.network) {
       // hackish: ensure game type migrates to "easy" from unassigned / default "tutorial"
       if (gamePrefs.net_game_type === 'tutorial') {

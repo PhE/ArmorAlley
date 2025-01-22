@@ -4,7 +4,8 @@
   "description": "A browser-based interpretation of the Macintosh + MS-DOS releases of Armor Alley.",
   "main": ".eslintrc.js",
   "scripts": {
-    "test": "echo \"Error: no test specified - sorry. :D\" && exit 1"
+    "test": "echo \"Error: no test specified - sorry. :D\" && exit 1",
+    "watch": "npx nodemon --watch src/js/ --exec \"npx gulp build\""
   },
   "repository": {
     "type": "git",

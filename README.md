@@ -1,5 +1,11 @@
-**Armor Alley: Remastered**
+
+**Armor Alley: Remastered (friendly fork)**
 ---
+
+The fork goal is a working [network 2x2](/docs/network.md) version
+as stated in [this ticket](https://github.com/scottschiller/ArmorAlley/issues/22).
+
+
 
 ~~~
                             ▄██▀      

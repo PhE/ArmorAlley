@@ -22,6 +22,7 @@ net.sendMessage({ type: 'CHAT', params });
 Actions:
 * let peerConnections[]
 * peerConnections.push(connection) on connection.on('open')
+* patched processData(data) to send to other clients
 
 
 
@@ -40,3 +41,4 @@ TODO:
 # log
 
 * 2025-01-18: chat is working one way (server > client) for 3 players
+* 2025-01-19: chat is working properly for 3 players and more
